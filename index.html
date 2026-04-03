@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인생지도 일기</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --p:#6C5CE7;--pl:#A29BFE;--s:#00CEC9;--a:#FD79A8;
+  --bg:#F4F3FF;--card:#FFF;--txt:#2D3436;--sub:#888;
+  --r:16px;--sh:0 4px 20px rgba(108,92,231,.1);
+}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,'Pretendard','Noto Sans KR',sans-serif;background:var(--bg);color:var(--txt);line-height:1.6;min-height:100vh}
+
+/* ── Layout ── */
+.app{max-width:520px;margin:0 auto;padding:16px 16px 100px}
+header{text-align:center;padding:32px 0 24px}
+header h1{font-size:1.6rem;font-weight:800;color:var(--p)}
+header p{font-size:.88rem;color:var(--sub);margin-top:4px}
+
+/* ── Bottom Nav ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;background:var(--card);
+  border-top:1px solid rgba(108,92,231,.08);display:flex;z-index:50;
+  box-shadow:0 -2px 12px rgba(0,0,0,.05);
+}
+.bottom-nav button{
+  flex:1;padding:10px 0 8px;border:none;background:none;cursor:pointer;
+  font-size:.68rem;font-weight:600;color:var(--sub);display:flex;
+  flex-direction:column;align-items:center;gap:3px;transition:.2s;
+}
+.bottom-nav button.active{color:var(--p)}
+.bottom-nav button .ico{font-size:1.3rem}
+
+/* ── Pages ── */
+.page{display:none;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Cards ── */
+.card{
+  background:var(--card);border-radius:var(--r);padding:24px;
+  box-shadow:var(--sh);margin-bottom:16px;border:1px solid rgba(108,92,231,.05);
+}
+.card h2{font-size:1.1rem;font-weight:700;color:var(--p);margin-bottom:16px}
+.card h3{font-size:.95rem;font-weight:700;margin-bottom:10px}
+
+/* ── Write Page ── */
+.date-input{
+  width:100%;padding:10px 14px;border:2px solid #E8E6F0;border-radius:10px;
+  font-size:.95rem;font-family:inherit;outline:none;transition:.2s;
+}
+.date-input:focus{border-color:var(--p)}
+
+.score-section{margin:20px 0}
+.score-label{font-weight:600;font-size:.9rem;margin-bottom:8px;display:block}
+.score-btns{display:flex;gap:8px}
+.score-btn{
+  flex:1;padding:10px 0;border:2px solid #E8E6F0;border-radius:12px;
+  background:var(--card);cursor:pointer;text-align:center;transition:.2s;
+  font-size:1.3rem;position:relative;
+}
+.score-btn:hover{border-color:var(--pl);background:#F8F7FF}
+.score-btn.selected{border-color:var(--p);background:#EDE9FF;box-shadow:0 0 0 3px rgba(108,92,231,.15)}
+.score-btn .label{font-size:.6rem;display:block;margin-top:2px;color:var(--sub)}
+
+.event-input{
+  width:100%;padding:12px 14px;border:2px solid #E8E6F0;border-radius:10px;
+  font-size:.9rem;font-family:inherit;outline:none;resize:vertical;
+  min-height:80px;transition:.2s;
+}
+.event-input:focus{border-color:var(--p)}
+.event-input::placeholder{color:#bbb}
+
+.save-btn{
+  width:100%;padding:14px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--p),var(--pl));color:#fff;
+  font-size:1rem;font-weight:700;cursor:pointer;transition:.2s;
+  box-shadow:0 4px 16px rgba(108,92,231,.25);margin-top:16px;
+}
+.save-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(108,92,231,.35)}
+.save-btn:active{transform:scale(.98)}
+
+/* ── Chart Page ── */
+.chart-container{position:relative;width:100%;aspect-ratio:16/10}
+canvas{width:100%!important;height:100%!important}
+.chart-range{display:flex;gap:8px;margin-bottom:16px}
+.range-btn{
+  padding:6px 16px;border:2px solid #E8E6F0;border-radius:8px;
+  background:var(--card);cursor:pointer;font-size:.82rem;font-weight:600;
+  transition:.2s;
+}
+.range-btn.active{background:var(--p);color:#fff;border-color:var(--p)}
+
+.legend{display:flex;gap:16px;justify-content:center;margin-top:12px;font-size:.8rem}
+.legend span{display:flex;align-items:center;gap:4px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dot.emo{background:#FF6B6B}
+.dot.faith{background:var(--s)}
+
+/* ── History Page ── */
+.history-item{
+  display:flex;gap:14px;align-items:flex-start;padding:14px 0;
+  border-bottom:1px solid #F0EEF5;
+}
+.history-item:last-child{border-bottom:none}
+.h-date{
+  min-width:52px;text-align:center;background:#F0EDFF;
+  border-radius:10px;padding:8px 6px;
+}
+.h-date .day{font-size:1.2rem;font-weight:800;color:var(--p);display:block}
+.h-date .month{font-size:.65rem;color:var(--sub)}
+.h-body{flex:1}
+.h-scores{display:flex;gap:12px;font-size:.82rem;margin-bottom:4px}
+.h-scores span{display:flex;align-items:center;gap:3px}
+.h-event{font-size:.85rem;color:#555}
+.h-actions{display:flex;gap:6px;margin-top:6px}
+.h-btn{
+  padding:4px 10px;border:1px solid #E0E0E0;border-radius:6px;
+  background:none;cursor:pointer;font-size:.72rem;color:var(--sub);transition:.15s;
+}
+.h-btn:hover{border-color:var(--p);color:var(--p)}
+.h-btn.del:hover{border-color:#E74C3C;color:#E74C3C}
+.empty-state{text-align:center;padding:48px 20px;color:var(--sub);font-size:.9rem}
+
+/* ── Feedback Page ── */
+.api-input{
+  width:100%;padding:10px 14px;border:2px solid #E8E6F0;border-radius:10px;
+  font-size:.82rem;font-family:monospace;outline:none;transition:.2s;
+}
+.api-input:focus{border-color:var(--p)}
+.api-hint{font-size:.72rem;color:var(--sub);margin-top:6px}
+.fb-btn{
+  width:100%;padding:14px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--s),#55EFC4);color:#fff;
+  font-size:1rem;font-weight:700;cursor:pointer;transition:.2s;
+  box-shadow:0 4px 16px rgba(0,206,201,.25);margin-top:12px;
+}
+.fb-btn:hover{transform:translateY(-1px)}
+.fb-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.feedback-box{
+  background:#F0FFFE;border:1px solid rgba(0,206,201,.2);
+  border-radius:12px;padding:20px;margin-top:16px;
+  font-size:.9rem;line-height:1.7;white-space:pre-wrap;
+}
+.feedback-box.loading{text-align:center;color:var(--sub);padding:32px}
+.spinner{display:inline-block;width:24px;height:24px;border:3px solid #E0E0E0;border-top-color:var(--s);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Toast ── */
+.toast{
+  position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);
+  background:var(--p);color:#fff;padding:12px 24px;border-radius:12px;
+  font-size:.88rem;font-weight:600;z-index:999;transition:.4s;
+  box-shadow:0 4px 16px rgba(108,92,231,.3);
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── Edit Modal ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--card);border-radius:var(--r);padding:28px;
+  width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.15);
+}
+.modal h2{font-size:1.1rem;font-weight:700;color:var(--p);margin-bottom:16px}
+.modal-btns{display:flex;gap:8px;margin-top:16px}
+.modal-btns button{
+  flex:1;padding:12px;border:none;border-radius:10px;font-weight:700;
+  font-size:.9rem;cursor:pointer;transition:.2s;
+}
+.modal-btns .cancel{background:#F0F0F0;color:var(--sub)}
+.modal-btns .confirm{background:var(--p);color:#fff}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <h1>인생지도 일기</h1>
+    <p>매일 감정과 신앙을 기록하고 성장해요</p>
+  </header>
+
+  <!-- ── 기록하기 ── -->
+  <div id="page-write" class="page active">
+    <div class="card">
+      <h2>오늘의 일기</h2>
+      <input type="date" id="entry-date" class="date-input">
+
+      <div class="score-section">
+        <span class="score-label">감정 상태</span>
+        <div class="score-btns" id="emo-btns">
+          <button class="score-btn" data-val="1" onclick="pick('emo',1)">😢<span class="label">힘들어</span></button>
+          <button class="score-btn" data-val="2" onclick="pick('emo',2)">😐<span class="label">그저그래</span></button>
+          <button class="score-btn" data-val="3" onclick="pick('emo',3)">🙂<span class="label">괜찮아</span></button>
+          <button class="score-btn" data-val="4" onclick="pick('emo',4)">😊<span class="label">좋아</span></button>
+          <button class="score-btn" data-val="5" onclick="pick('emo',5)">🥰<span class="label">최고</span></button>
+        </div>
+      </div>
+
+      <div class="score-section">
+        <span class="score-label">신앙 상태</span>
+        <div class="score-btns" id="faith-btns">
+          <button class="score-btn" data-val="1" onclick="pick('faith',1)">😔<span class="label">멀어</span></button>
+          <button class="score-btn" data-val="2" onclick="pick('faith',2)">🤔<span class="label">모르겠어</span></button>
+          <button class="score-btn" data-val="3" onclick="pick('faith',3)">🙏<span class="label">보통</span></button>
+          <button class="score-btn" data-val="4" onclick="pick('faith',4)">✝️<span class="label">가까워</span></button>
+          <button class="score-btn" data-val="5" onclick="pick('faith',5)">🔥<span class="label">함께해</span></button>
+        </div>
+      </div>
+
+      <div class="score-section">
+        <span class="score-label">오늘 어떤 일이 있었어?</span>
+        <textarea id="event-text" class="event-input" placeholder="예: 친구랑 놀았어, 찬양 연습했어, 시험 걱정..."></textarea>
+      </div>
+
+      <button class="save-btn" onclick="saveEntry()">저장하기</button>
+    </div>
+  </div>
+
+  <!-- ── 그래프 ── -->
+  <div id="page-chart" class="page">
+    <div class="card">
+      <h2>나의 변화 그래프</h2>
+      <div class="chart-range">
+        <button class="range-btn active" onclick="setRange(7,this)">7일</button>
+        <button class="range-btn" onclick="setRange(14,this)">14일</button>
+        <button class="range-btn" onclick="setRange(30,this)">30일</button>
+      </div>
+      <div class="chart-container"><canvas id="chart"></canvas></div>
+      <div class="legend">
+        <span><span class="dot emo"></span> 감정</span>
+        <span><span class="dot faith"></span> 신앙</span>
+      </div>
+    </div>
+    <div class="card" id="stats-card">
+      <h3>이번 기간 요약</h3>
+      <div id="stats-body"></div>
+    </div>
+  </div>
+
+  <!-- ── 기록 목록 ── -->
+  <div id="page-history" class="page">
+    <div class="card">
+      <h2>지난 기록</h2>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+  <!-- ── AI 피드백 ── -->
+  <div id="page-feedback" class="page">
+    <div class="card">
+      <h2>AI 영적 피드백</h2>
+      <label class="score-label">Anthropic API Key</label>
+      <input type="password" id="api-key" class="api-input" placeholder="sk-ant-...">
+      <p class="api-hint">키는 브라우저에만 저장되고 외부로 전송되지 않아요 (Anthropic 직접 호출)</p>
+      <button class="fb-btn" id="fb-btn" onclick="getFeedback()">AI 피드백 받기</button>
+      <div id="feedback-result"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <button class="active" onclick="go('write',this)"><span class="ico">✏️</span>기록</button>
+  <button onclick="go('chart',this)"><span class="ico">📊</span>그래프</button>
+  <button onclick="go('history',this)"><span class="ico">📋</span>목록</button>
+  <button onclick="go('feedback',this)"><span class="ico">💬</span>피드백</button>
+</nav>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <h2>기록 수정</h2>
+    <input type="date" id="edit-date" class="date-input" disabled style="margin-bottom:12px;background:#f8f8f8">
+    <div class="score-section">
+      <span class="score-label">감정 상태</span>
+      <div class="score-btns" id="edit-emo-btns">
+        <button class="score-btn" data-val="1" onclick="pickEdit('emo',1)">😢</button>
+        <button class="score-btn" data-val="2" onclick="pickEdit('emo',2)">😐</button>
+        <button class="score-btn" data-val="3" onclick="pickEdit('emo',3)">🙂</button>
+        <button class="score-btn" data-val="4" onclick="pickEdit('emo',4)">😊</button>
+        <button class="score-btn" data-val="5" onclick="pickEdit('emo',5)">🥰</button>
+      </div>
+    </div>
+    <div class="score-section">
+      <span class="score-label">신앙 상태</span>
+      <div class="score-btns" id="edit-faith-btns">
+        <button class="score-btn" data-val="1" onclick="pickEdit('faith',1)">😔</button>
+        <button class="score-btn" data-val="2" onclick="pickEdit('faith',2)">🤔</button>
+        <button class="score-btn" data-val="3" onclick="pickEdit('faith',3)">🙏</button>
+        <button class="score-btn" data-val="4" onclick="pickEdit('faith',4)">✝️</button>
+        <button class="score-btn" data-val="5" onclick="pickEdit('faith',5)">🔥</button>
+      </div>
+    </div>
+    <div class="score-section">
+      <span class="score-label">일상 사건</span>
+      <textarea id="edit-event" class="event-input" style="min-height:60px"></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="cancel" onclick="closeModal()">취소</button>
+      <button class="confirm" onclick="saveEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──
+const KEY = 'lifeMapDiary';
+let selected = { emo: 0, faith: 0 };
+let editState = { date: '', emo: 0, faith: 0 };
+let chartRange = 7;
+
+function getData() { return JSON.parse(localStorage.getItem(KEY) || '{}'); }
+function setData(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
+
+// ── Init ──
+document.getElementById('entry-date').value = new Date().toISOString().slice(0, 10);
+loadApiKey();
+
+// ── Navigation ──
+function go(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (page === 'chart') drawChart();
+  if (page === 'history') renderHistory();
+}
+
+// ── Score Picking ──
+function pick(type, val) {
+  selected[type] = val;
+  const container = document.getElementById(type === 'emo' ? 'emo-btns' : 'faith-btns');
+  container.querySelectorAll('.score-btn').forEach(b => {
+    b.classList.toggle('selected', +b.dataset.val === val);
+  });
+}
+
+function pickEdit(type, val) {
+  editState[type] = val;
+  const container = document.getElementById(type === 'emo' ? 'edit-emo-btns' : 'edit-faith-btns');
+  container.querySelectorAll('.score-btn').forEach(b => {
+    b.classList.toggle('selected', +b.dataset.val === val);
+  });
+}
+
+// ── Save Entry ──
+function saveEntry() {
+  const date = document.getElementById('entry-date').value;
+  if (!date) return toast('날짜를 선택해줘!');
+  if (!selected.emo) return toast('감정 상태를 선택해줘!');
+  if (!selected.faith) return toast('신앙 상태를 선택해줘!');
+
+  const data = getData();
+  data[date] = {
+    emotion: selected.emo,
+    faith: selected.faith,
+    event: document.getElementById('event-text').value.trim() || ''
+  };
+  setData(data);
+
+  // Reset
+  selected = { emo: 0, faith: 0 };
+  document.querySelectorAll('#emo-btns .score-btn, #faith-btns .score-btn')
+    .forEach(b => b.classList.remove('selected'));
+  document.getElementById('event-text').value = '';
+  toast('저장 완료!');
+}
+
+// ── Chart ──
+function drawChart() {
+  const canvas = document.getElementById('chart');
+  const ctx = canvas.getContext('2d');
+  const data = getData();
+
+  // Get entries for range
+  const today = new Date();
+  const entries = [];
+  for (let i = chartRange - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    entries.push({ date: key, ...(data[key] || { emotion: null, faith: null }) });
+  }
+
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const pad = { top: 20, right: 20, bottom: 36, left: 36 };
+  const gW = W - pad.left - pad.right;
+  const gH = H - pad.top - pad.bottom;
+
+  // Grid
+  ctx.strokeStyle = '#E8E6F0';
+  ctx.lineWidth = 1;
+  ctx.font = '11px -apple-system, sans-serif';
+  ctx.fillStyle = '#AAA';
+  ctx.textAlign = 'right';
+  for (let i = 1; i <= 5; i++) {
+    const y = pad.top + gH - (i / 5) * gH;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+    ctx.fillText(i, pad.left - 8, y + 4);
+  }
+
+  // Filter entries with data
+  const valid = entries.filter(e => e.emotion !== null);
+  if (valid.length === 0) {
+    ctx.fillStyle = '#AAA'; ctx.textAlign = 'center'; ctx.font = '14px sans-serif';
+    ctx.fillText('아직 기록이 없어요!', W / 2, H / 2);
+    document.getElementById('stats-body').innerHTML = '<p style="color:#999;font-size:.85rem">기록을 추가하면 요약이 표시돼요</p>';
+    return;
+  }
+
+  // X labels
+  ctx.textAlign = 'center'; ctx.fillStyle = '#AAA'; ctx.font = '10px sans-serif';
+  const step = entries.length > 1 ? gW / (entries.length - 1) : 0;
+  entries.forEach((e, i) => {
+    const x = pad.left + i * step;
+    const label = e.date.slice(5).replace('-', '/');
+    // Show every nth label to avoid overlap
+    const nth = entries.length > 14 ? 3 : entries.length > 7 ? 2 : 1;
+    if (i % nth === 0 || i === entries.length - 1) {
+      ctx.fillText(label, x, H - 8);
+    }
+  });
+
+  // Draw line function
+  function drawLine(key, color) {
+    ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+    ctx.beginPath();
+    let started = false;
+    entries.forEach((e, i) => {
+      if (e[key] === null) return;
+      const x = pad.left + i * step;
+      const y = pad.top + gH - (e[key] / 5) * gH;
+      if (!started) { ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Dots
+    entries.forEach((e, i) => {
+      if (e[key] === null) return;
+      const x = pad.left + i * step;
+      const y = pad.top + gH - (e[key] / 5) * gH;
+      ctx.fillStyle = '#FFF'; ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fill();
+      // Value label
+      ctx.fillStyle = color; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(e[key], x, y - 10);
+    });
+  }
+
+  drawLine('emotion', '#FF6B6B');
+  drawLine('faith', '#00CEC9');
+
+  // Stats
+  const emos = valid.map(e => e.emotion);
+  const faiths = valid.map(e => e.faith);
+  const avg = arr => (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1);
+  const trend = arr => arr.length < 2 ? '→' : arr[arr.length - 1] > arr[0] ? '↑' : arr[arr.length - 1] < arr[0] ? '↓' : '→';
+  const trendColor = t => t === '↑' ? '#00B894' : t === '↓' ? '#E74C3C' : '#999';
+
+  const emoT = trend(emos), faithT = trend(faiths);
+  document.getElementById('stats-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:.85rem">
+      <div style="background:#FFF5F5;padding:14px;border-radius:10px;text-align:center">
+        <div style="font-size:.75rem;color:#999">감정 평균</div>
+        <div style="font-size:1.4rem;font-weight:800;color:#FF6B6B">${avg(emos)}</div>
+        <div style="color:${trendColor(emoT)};font-weight:700">${emoT} ${emoT === '↑' ? '상승' : emoT === '↓' ? '하락' : '유지'}</div>
+      </div>
+      <div style="background:#F0FFFE;padding:14px;border-radius:10px;text-align:center">
+        <div style="font-size:.75rem;color:#999">신앙 평균</div>
+        <div style="font-size:1.4rem;font-weight:800;color:#00CEC9">${avg(faiths)}</div>
+        <div style="color:${trendColor(faithT)};font-weight:700">${faithT} ${faithT === '↑' ? '상승' : faithT === '↓' ? '하락' : '유지'}</div>
+      </div>
+    </div>
+    <p style="margin-top:12px;font-size:.8rem;color:#999;text-align:center">총 ${valid.length}일 기록됨</p>
+  `;
+}
+
+function setRange(days, btn) {
+  chartRange = days;
+  document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  drawChart();
+}
+
+// ── History ──
+const EMO_ICONS = ['','😢','😐','🙂','😊','🥰'];
+const FAITH_ICONS = ['','😔','🤔','🙏','✝️','🔥'];
+
+function renderHistory() {
+  const data = getData();
+  const dates = Object.keys(data).sort().reverse();
+  const el = document.getElementById('history-list');
+
+  if (dates.length === 0) {
+    el.innerHTML = '<div class="empty-state">아직 기록이 없어요!<br>✏️ 기록 탭에서 첫 일기를 써보자!</div>';
+    return;
+  }
+
+  el.innerHTML = dates.map(date => {
+    const e = data[date];
+    const [, m, d] = date.split('-');
+    return `
+      <div class="history-item">
+        <div class="h-date"><span class="day">${+d}</span><span class="month">${+m}월</span></div>
+        <div class="h-body">
+          <div class="h-scores">
+            <span>${EMO_ICONS[e.emotion]} 감정 ${e.emotion}/5</span>
+            <span>${FAITH_ICONS[e.faith]} 신앙 ${e.faith}/5</span>
+          </div>
+          ${e.event ? `<div class="h-event">${escapeHtml(e.event)}</div>` : ''}
+          <div class="h-actions">
+            <button class="h-btn" onclick="openEdit('${date}')">수정</button>
+            <button class="h-btn del" onclick="deleteEntry('${date}')">삭제</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+function deleteEntry(date) {
+  if (!confirm(`${date} 기록을 삭제할까?`)) return;
+  const data = getData();
+  delete data[date];
+  setData(data);
+  renderHistory();
+  toast('삭제 완료!');
+}
+
+// ── Edit Modal ──
+function openEdit(date) {
+  const data = getData();
+  const e = data[date];
+  editState = { date, emo: e.emotion, faith: e.faith };
+  document.getElementById('edit-date').value = date;
+  document.getElementById('edit-event').value = e.event || '';
+
+  document.querySelectorAll('#edit-emo-btns .score-btn').forEach(b => {
+    b.classList.toggle('selected', +b.dataset.val === e.emotion);
+  });
+  document.querySelectorAll('#edit-faith-btns .score-btn').forEach(b => {
+    b.classList.toggle('selected', +b.dataset.val === e.faith);
+  });
+
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('edit-modal').classList.remove('open'); }
+
+function saveEdit() {
+  if (!editState.emo || !editState.faith) return toast('점수를 선택해줘!');
+  const data = getData();
+  data[editState.date] = {
+    emotion: editState.emo,
+    faith: editState.faith,
+    event: document.getElementById('edit-event').value.trim()
+  };
+  setData(data);
+  closeModal();
+  renderHistory();
+  toast('수정 완료!');
+}
+
+// ── AI Feedback ──
+function loadApiKey() {
+  const k = localStorage.getItem('anthropic_key') || '';
+  document.getElementById('api-key').value = k;
+}
+
+async function getFeedback() {
+  const apiKey = document.getElementById('api-key').value.trim();
+  if (!apiKey) return toast('API 키를 입력해줘!');
+  localStorage.setItem('anthropic_key', apiKey);
+
+  const data = getData();
+  const dates = Object.keys(data).sort().slice(-7);
+  if (dates.length === 0) return toast('기록이 없어! 먼저 일기를 써줘!');
+
+  const records = dates.map(d => {
+    const e = data[d];
+    return `- ${d}: 감정 ${e.emotion}/5, 신앙 ${e.faith}/5, 일상: ${e.event || '없음'}`;
+  }).join('\n');
+
+  const btn = document.getElementById('fb-btn');
+  const result = document.getElementById('feedback-result');
+  btn.disabled = true;
+  btn.textContent = '분석 중...';
+  result.innerHTML = '<div class="feedback-box loading"><div class="spinner"></div><br>기록을 분석하고 있어요...</div>';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: `너는 교회 여름수련회에서 중학생들을 돌보는 따뜻한 AI 상담사야.
+아래는 학생의 최근 일기 기록이야.
+
+${records}
+
+이 기록을 바탕으로 다음을 해줘:
+1. 감정 흐름과 신앙 상태를 간단히 분석 (2-3문장)
+2. 격려와 위로의 메시지 (1-2문장)
+3. 오늘 하루를 위한 짧은 성경 말씀 한 구절 추천
+
+말투는 중학생 친구에게 말하듯 친근하고 따뜻하게! 전체 길이는 짧게, 250자 내외로 해줘.`
+        }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `API 오류 (${res.status})`);
+    }
+
+    const json = await res.json();
+    const text = json.content[0].text;
+    result.innerHTML = `<div class="feedback-box">${escapeHtml(text)}</div>`;
+  } catch (err) {
+    result.innerHTML = `<div class="feedback-box" style="background:#FFF5F5;border-color:#FECACA;color:#C0392B">오류: ${escapeHtml(err.message)}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'AI 피드백 받기';
+  }
+}
+
+// ── Toast ──
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+</script>
+</body>
+</html>
