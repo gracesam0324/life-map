@@ -201,6 +201,7 @@ canvas{width:100%!important;height:100%!important}
           <button class="score-btn" data-val="4" onclick="pick('emo',4)">😊<span class="label">좋아</span></button>
           <button class="score-btn" data-val="5" onclick="pick('emo',5)">🥰<span class="label">최고</span></button>
         </div>
+        <textarea id="emo-text" class="event-input" style="margin-top:10px;min-height:60px" placeholder="지금 감정을 자유롭게 적어봐 (선택)"></textarea>
       </div>
 
       <div class="score-section">
@@ -212,6 +213,7 @@ canvas{width:100%!important;height:100%!important}
           <button class="score-btn" data-val="4" onclick="pick('faith',4)">✝️<span class="label">가까워</span></button>
           <button class="score-btn" data-val="5" onclick="pick('faith',5)">🔥<span class="label">함께해</span></button>
         </div>
+        <textarea id="faith-text" class="event-input" style="margin-top:10px;min-height:60px" placeholder="신앙에 대해 하고 싶은 말을 적어봐 (선택)"></textarea>
       </div>
 
       <div class="score-section">
@@ -227,10 +229,14 @@ canvas{width:100%!important;height:100%!important}
   <div id="page-chart" class="page">
     <div class="card">
       <h2>나의 변화 그래프</h2>
-      <div class="chart-range">
-        <button class="range-btn active" onclick="setRange(7,this)">7일</button>
-        <button class="range-btn" onclick="setRange(14,this)">14일</button>
-        <button class="range-btn" onclick="setRange(30,this)">30일</button>
+      <div style="margin-bottom:8px;font-size:.75rem;font-weight:700;color:#999;letter-spacing:.05em">⛺ 수련회 활동 중</div>
+      <div class="chart-range" style="margin-bottom:12px">
+        <button class="range-btn active" id="btn-4" onclick="setRange(4,this)">4일</button>
+      </div>
+      <div style="margin-bottom:8px;font-size:.75rem;font-weight:700;color:#999;letter-spacing:.05em">🏠 수련회 끝난 후</div>
+      <div class="chart-range" style="margin-bottom:16px">
+        <button class="range-btn" id="btn-7" onclick="setRange(7,this)">7일</button>
+        <button class="range-btn" id="btn-30" onclick="setRange(30,this)">30일</button>
       </div>
       <div class="chart-container"><canvas id="chart"></canvas></div>
       <div class="legend">
@@ -238,13 +244,100 @@ canvas{width:100%!important;height:100%!important}
         <span><span class="dot faith"></span> 신앙</span>
       </div>
     </div>
-    <div class="card" id="stats-card">
-      <h3>이번 기간 요약</h3>
-      <div id="stats-body"></div>
-    </div>
   </div>
 
-  <!-- ── 기록 목록 ── -->
+    <!-- 메뉴얼 토글 버튼 -->
+    <div id="manual-toggle-wrap" style="display:none;margin-bottom:0">
+      <button onclick="toggleManual()" id="manual-toggle-btn" style="width:100%;padding:13px;border:2px dashed #D0CBF5;border-radius:12px;background:#F8F7FF;color:#6C5CE7;font-size:.9rem;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit">
+        📖 변화 그래프 피드백 메뉴얼 보기 ▾
+      </button>
+    </div>
+
+    <!-- 변화 그래프 피드백 메뉴얼 -->
+    <div class="card" id="manual-card" style="display:none;margin-top:16px">
+      <h2 style="margin-bottom:20px">📖 변화 그래프 피드백 메뉴얼</h2>
+
+      <!-- 감정 메뉴얼 -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:.88rem;font-weight:700;color:#FF6B6B;margin-bottom:12px">😊 감정 점수별 메뉴얼</div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="background:#FFF5F5;border-left:4px solid #FF6B6B;border-radius:0 10px 10px 0;padding:12px 14px">
+            <div style="font-size:.8rem;font-weight:800;color:#FF6B6B;margin-bottom:4px">😢 1점 — 많이 힘든 상태</div>
+            <div style="font-size:.78rem;color:#555;line-height:1.6">지금 많이 힘들구나. 혼자 다 감당하려 하지 않아도 돼. 오늘은 쉬어도 괜찮아. 신뢰할 수 있는 선생님이나 친구에게 마음을 나눠봐. 하나님도 네 마음을 알고 계셔. <b style="color:#FF6B6B">→ 담당 교사에게 꼭 알려주세요.</b></div>
+          </div>
+          <div style="background:#FFF9F5;border-left:4px solid #FDCB6E;border-radius:0 10px 10px 0;padding:12px 14px">
+            <div style="font-size:.8rem;font-weight:800;color:#E17055;margin-bottom:4px">😐 2점 — 지치거나 무기력한 상태</div>
+            <div style="font-size:.78rem;color:#555;line-height:1.6">뭔가 무겁고 지쳐있는 느낌이지? 작은 것 하나라도 감사한 걸 찾아봐. 찬양 한 곡을 틀고 조용히 앉아있는 것만으로도 힘이 될 수 있어. <b style="color:#E17055">→ 소그룹 나눔 시간에 솔직히 나눠봐요.</b></div>
+          </div>
+          <div style="background:#FFFDF5;border-left:4px solid #FDCB6E;border-radius:0 10px 10px 0;padding:12px 14px">
+            <div style="font-size:.8rem;font-weight:800;color:#B7950B;margin-bottom:4px">🙂 3점 — 평범한 상태</div>
+            <div style="font-size:.78rem;color:#555;line-height:1.6">그저 그런 하루였구나. 괜찮아, 매일이 특별할 필요는 없어. 오늘 하루 어떤 순간이 좋았는지 한 가지만 떠올려봐. 작은 행복이 쌓여 큰 힘이 돼. <b style="color:#B7950B">→ 내일 기대되는 일을 하나 적어봐요.</b></div>
+          </div>
+          <div style="background:#F5FFF8;border-left:4px solid #00B894;border-radius:0 10px 10px 0;padding:12px 14px">
+            <div style="font-size:.8rem;font-weight:800;color:#00B894;margin-bottom:4px">😊 4점 — 기분 좋은 상태</div>
+            <div style="font-size:.78rem;color:#555;line-height:1.6">오늘 기분이 좋았구나! 그 에너지를 주변 친구들에게도 나눠줘. 긍정적인 에너지는 퍼져나가. 이 좋은 감정, 일기에 자세히 기록해두자. <b style="color:#00B894">→ 주변에 힘든 친구가 있는지 살펴봐요.</b></div>
+          </div>
+          <div style="background:#F0FFF4;border-left:4px solid #00CEC9;border-radius:0 10px 10px 0;padding:12px 14px">
+            <div style="font-size:.8rem;font-weight:800;color:#00CEC9;margin-bottom:4px">🥰 5점 — 최고의 상태</div>
+            <div style="font-size:.78rem;color:#555;line-height:1.6">와, 오늘 정말 최고였구나! 이 기쁨이 어디서 왔는지 기억해둬. 하나님이 주신 기쁨은 상황이 바뀌어도 사라지지 않아. 감사 기도 꼭 해봐! <b style="color:#00CEC9">→ 이 순간을 기록으로 남겨 나중에 힘든 날 꺼내봐요.</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:#F0EEF5;margin:4px 0 20px"></div>
+
+      <!-- 신앙 메뉴얼 -->
+      <div>
+        <div style="font-size:.88rem;font-weight:700;color:#6C5CE7;margin-bottom:12px">✝️ 신앙 점수별 메뉴얼</div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="background:#FFF5F5;border-left:4px solid #E74C3C;border-radius:0 10px 10px 0;padding:12px 14px">
+            <div style="font-size:.8rem;font-weight:800;color:#E74C3C;margin-bottom:4px">😔 1점 — 하나님과 많이 멀어진 상태</div>
+            <div style="font-size:.78rem;color:#555;line-height:1.6">하나님이 멀게 느껴지는 시간이구나. 그래도 괜찮아, 하나님은 여전히 네 곁에 계셔. 성경 딱 한 구절만 읽어봐. 시편 23편부터 시작해봐. <b style="color:#E74C3C">→ 교사와 1:1 대화 시간을 갖는 걸 추천해요.</b></div>
+          </div>
+          <div style="background:#FAF5FF;border-left:4px solid #A29BFE;border-radius:0 10px 10px 0;padding:12px 14px">
+            <div style="font-size:.8rem;font-weight:800;color:#6C5CE7;margin-bottom:4px">🤔 2점 — 신앙에 의문이나 혼란이 있는 상태</div>
+            <div style="font-size:.78rem;color:#555;line-height:1.6">믿음에 대해 고민되는 게 있구나. 그 의문은 나쁜 게 아니야. 오히려 더 깊이 알아가는 과정이야. 궁금한 걸 교사에게 솔직하게 물어봐. <b style="color:#6C5CE7">→ 소그룹에서 솔직한 질문을 나눠봐요.</b></div>
+          </div>
+          <div style="background:#F5F5FF;border-left:4px solid #B2BEFF;border-radius:0 10px 10px 0;padding:12px 14px">
+            <div style="font-size:.8rem;font-weight:800;color:#5A67D8;margin-bottom:4px">🙏 3점 — 평범한 신앙 상태</div>
+            <div style="font-size:.78rem;color:#555;line-height:1.6">신앙이 루틴처럼 느껴지는 시간이구나. 오늘 기도할 때 형식 없이 그냥 하고 싶은 말 한 가지만 해봐. "하나님, 저 솔직히..." 로 시작해봐. <b style="color:#5A67D8">→ 찬양 한 곡을 집중해서 들으며 묵상해봐요.</b></div>
+          </div>
+          <div style="background:#F0F7FF;border-left:4px solid #0984E3;border-radius:0 10px 10px 0;padding:12px 14px">
+            <div style="font-size:.8rem;font-weight:800;color:#0984E3;margin-bottom:4px">✝️ 4점 — 하나님과 가깝게 느껴지는 상태</div>
+            <div style="font-size:.78rem;color:#555;line-height:1.6">하나님이 가깝게 느껴지는 좋은 날이구나! 이 은혜의 시간을 기록해두고, 주변의 친구들을 위해 중보기도 해봐. 네 신앙이 친구에게 힘이 될 수 있어. <b style="color:#0984E3">→ 오늘 느낀 은혜를 친구 한 명에게 나눠봐요.</b></div>
+          </div>
+          <div style="background:#F0FFFE;border-left:4px solid #00CEC9;border-radius:0 10px 10px 0;padding:12px 14px">
+            <div style="font-size:.8rem;font-weight:800;color:#00B894;margin-bottom:4px">🔥 5점 — 하나님의 임재를 강하게 느끼는 상태</div>
+            <div style="font-size:.78rem;color:#555;line-height:1.6">와! 오늘 하나님과 정말 깊이 만난 것 같구나. 이 경험을 꼭 자세히 기록해둬. 훗날 힘들 때 이 기록이 큰 힘이 될 거야. 하나님께 감사 기도 드려봐. <b style="color:#00B894">→ 이 경험을 간증으로 나눌 준비를 해봐요.</b></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 그래프 패턴 해석 -->
+      <div style="height:1px;background:#F0EEF5;margin:20px 0"></div>
+      <div style="font-size:.88rem;font-weight:700;color:#2D3436;margin-bottom:12px">📈 그래프 패턴 해석</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="background:#F8F7FF;border-radius:10px;padding:12px 14px">
+          <div style="font-size:.8rem;font-weight:800;color:#6C5CE7;margin-bottom:4px">📈 두 선 모두 올라가고 있어요</div>
+          <div style="font-size:.78rem;color:#555;line-height:1.6">감정도 신앙도 함께 성장하고 있어요! 지금 이 상태를 유지하면서 하나님께 감사해요.</div>
+        </div>
+        <div style="background:#FFF8F8;border-radius:10px;padding:12px 14px">
+          <div style="font-size:.8rem;font-weight:800;color:#E17055;margin-bottom:4px">📉 두 선 모두 내려가고 있어요</div>
+          <div style="font-size:.78rem;color:#555;line-height:1.6">지치고 힘든 시간이에요. 혼자 버티지 말고 교사에게 꼭 이야기해줘요. 쉬는 것도 용기예요.</div>
+        </div>
+        <div style="background:#F5FFFD;border-radius:10px;padding:12px 14px">
+          <div style="font-size:.8rem;font-weight:800;color:#00B894;margin-bottom:4px">😊↑ ✝️↓ 감정은 좋은데 신앙은 내려가요</div>
+          <div style="font-size:.78rem;color:#555;line-height:1.6">즐거운 일들이 많아서 하나님 생각할 여유가 없었나봐요. 바쁜 중에도 짧은 기도 한 번씩 해봐요.</div>
+        </div>
+        <div style="background:#F8F5FF;border-radius:10px;padding:12px 14px">
+          <div style="font-size:.8rem;font-weight:800;color:#6C5CE7;margin-bottom:4px">😊↓ ✝️↑ 힘든데 신앙은 올라가요</div>
+          <div style="font-size:.78rem;color:#555;line-height:1.6">어려운 상황 속에서도 하나님을 더 의지하고 있네요. 이게 진짜 믿음이에요. 정말 잘하고 있어요!</div>
+        </div>
+      </div>
+    </div>
+  </div> -->
   <div id="page-history" class="page">
     <div class="card">
       <h2>지난 기록</h2>
@@ -316,7 +409,7 @@ canvas{width:100%!important;height:100%!important}
 const KEY = 'lifeMapDiary';
 let selected = { emo: 0, faith: 0 };
 let editState = { date: '', emo: 0, faith: 0 };
-let chartRange = 7;
+let chartRange = 4;
 
 function getData() { return JSON.parse(localStorage.getItem(KEY) || '{}'); }
 function setData(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
@@ -331,7 +424,13 @@ function go(page, btn) {
   document.getElementById('page-' + page).classList.add('active');
   document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  if (page === 'chart') drawChart();
+  if (page === 'chart') {
+    drawChart();
+    document.getElementById('manual-toggle-wrap').style.display = 'block';
+  } else {
+    document.getElementById('manual-toggle-wrap').style.display = 'none';
+    document.getElementById('manual-card').style.display = 'none';
+  }
   if (page === 'history') renderHistory();
 }
 
@@ -363,6 +462,8 @@ function saveEntry() {
   data[date] = {
     emotion: selected.emo,
     faith: selected.faith,
+    emoNote: document.getElementById('emo-text').value.trim() || '',
+    faithNote: document.getElementById('faith-text').value.trim() || '',
     event: document.getElementById('event-text').value.trim() || ''
   };
   setData(data);
@@ -371,6 +472,8 @@ function saveEntry() {
   selected = { emo: 0, faith: 0 };
   document.querySelectorAll('#emo-btns .score-btn, #faith-btns .score-btn')
     .forEach(b => b.classList.remove('selected'));
+  document.getElementById('emo-text').value = '';
+  document.getElementById('faith-text').value = '';
   document.getElementById('event-text').value = '';
   toast('저장 완료!');
 }
@@ -421,7 +524,6 @@ function drawChart() {
   if (valid.length === 0) {
     ctx.fillStyle = '#AAA'; ctx.textAlign = 'center'; ctx.font = '14px sans-serif';
     ctx.fillText('아직 기록이 없어요!', W / 2, H / 2);
-    document.getElementById('stats-body').innerHTML = '<p style="color:#999;font-size:.85rem">기록을 추가하면 요약이 표시돼요</p>';
     return;
   }
 
@@ -467,30 +569,6 @@ function drawChart() {
 
   drawLine('emotion', '#FF6B6B');
   drawLine('faith', '#00CEC9');
-
-  // Stats
-  const emos = valid.map(e => e.emotion);
-  const faiths = valid.map(e => e.faith);
-  const avg = arr => (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1);
-  const trend = arr => arr.length < 2 ? '→' : arr[arr.length - 1] > arr[0] ? '↑' : arr[arr.length - 1] < arr[0] ? '↓' : '→';
-  const trendColor = t => t === '↑' ? '#00B894' : t === '↓' ? '#E74C3C' : '#999';
-
-  const emoT = trend(emos), faithT = trend(faiths);
-  document.getElementById('stats-body').innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:.85rem">
-      <div style="background:#FFF5F5;padding:14px;border-radius:10px;text-align:center">
-        <div style="font-size:.75rem;color:#999">감정 평균</div>
-        <div style="font-size:1.4rem;font-weight:800;color:#FF6B6B">${avg(emos)}</div>
-        <div style="color:${trendColor(emoT)};font-weight:700">${emoT} ${emoT === '↑' ? '상승' : emoT === '↓' ? '하락' : '유지'}</div>
-      </div>
-      <div style="background:#F0FFFE;padding:14px;border-radius:10px;text-align:center">
-        <div style="font-size:.75rem;color:#999">신앙 평균</div>
-        <div style="font-size:1.4rem;font-weight:800;color:#00CEC9">${avg(faiths)}</div>
-        <div style="color:${trendColor(faithT)};font-weight:700">${faithT} ${faithT === '↑' ? '상승' : faithT === '↓' ? '하락' : '유지'}</div>
-      </div>
-    </div>
-    <p style="margin-top:12px;font-size:.8rem;color:#999;text-align:center">총 ${valid.length}일 기록됨</p>
-  `;
 }
 
 function setRange(days, btn) {
@@ -525,6 +603,8 @@ function renderHistory() {
             <span>${EMO_ICONS[e.emotion]} 감정 ${e.emotion}/5</span>
             <span>${FAITH_ICONS[e.faith]} 신앙 ${e.faith}/5</span>
           </div>
+          ${e.emoNote ? `<div class="h-event" style="color:#E17055">💬 감정: ${escapeHtml(e.emoNote)}</div>` : ''}
+          ${e.faithNote ? `<div class="h-event" style="color:#6C5CE7">💬 신앙: ${escapeHtml(e.faithNote)}</div>` : ''}
           ${e.event ? `<div class="h-event">${escapeHtml(e.event)}</div>` : ''}
           <div class="h-actions">
             <button class="h-btn" onclick="openEdit('${date}')">수정</button>
@@ -541,7 +621,6 @@ function escapeHtml(s) {
 }
 
 function deleteEntry(date) {
-  if (!confirm(`${date} 기록을 삭제할까?`)) return;
   const data = getData();
   delete data[date];
   setData(data);
@@ -652,6 +731,14 @@ ${records}
     btn.disabled = false;
     btn.textContent = 'AI 피드백 받기';
   }
+}
+
+function toggleManual() {
+  const card = document.getElementById('manual-card');
+  const btn = document.getElementById('manual-toggle-btn');
+  const isOpen = card.style.display === 'block';
+  card.style.display = isOpen ? 'none' : 'block';
+  btn.textContent = isOpen ? '📖 변화 그래프 피드백 메뉴얼 보기 ▾' : '📖 변화 그래프 피드백 메뉴얼 닫기 ▴';
 }
 
 // ── Toast ──
